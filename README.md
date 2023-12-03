@@ -32,6 +32,9 @@ docker compose -f main_compose.yml up
 可自动加载微调后的PEFT模型，请将微调后的checkpoint放到模型目录中，具体目录如图所示：
 ![cover](./imgs/peft_checkpoint.png)
 
+### 如何添加新的模型
+请查看[utils.py](./utils.py)文件，如想添加qwen模型，请添加一个函数`def get_qwen()`去加载模型，并在`get_models()`函数中加上qwen模型的映射即可。
+
 ### 申明
 
 - 本项目完全借鉴于ChatGLM3中的开源代码[openai_api.py](https://github.com/THUDM/ChatGLM3/blob/main/openai_api_demo/openai_api.py)；
