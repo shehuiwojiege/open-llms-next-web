@@ -137,7 +137,7 @@ def process_msg(messages: List[ChatMessage]):
         # if i == 0 and m.role == "system":
         # messages.append({
         #     'role': m.role,
-        #     'content': f'\n你是小匠，一个由领匠AI训练的大语言模型。\n知识截至日期：2023-04\n当前型号：Baichuan2-13B-Chat\n当前时间：{datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n\n'
+        #     'content': f'\n你是小花，一个由小花AI训练的大语言模型。\n知识截至日期：2023-04\n当前型号：Baichuan2-13B-Chat\n当前时间：{datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")}\n\n'
         # })
         # messages.append({
         #     'role': m.role,
