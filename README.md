@@ -1,6 +1,6 @@
 <h1 align="center">Open LLMS Next Web</h1>
 
-适用于开源大模型的Next Web。本项目适用于没有ChatGPT资源，而想使用ChatGPT-Next-Web界面的用户，将多个开源大模型（如：百川，ChatGLM）作为Next-Web界面的后端，并实现了与ChatGPT-Next-Web一致的接口。
+一键免费部署你的私人 Open-LLMS-Next-Web 网页应用，适用于开源离线大模型的Next Web。本项目适用于没有ChatGPT资源，而想使用ChatGPT-Next-Web界面的用户，将多个开源大模型（如：百川，ChatGLM）作为Next-Web界面的后端，并实现了与ChatGPT-Next-Web一致的接口。
 
 ### 简单使用
 
@@ -20,7 +20,7 @@ docker compose -f main_compose.yml up
 ```
 后台部署请加`-d`即可。
 
-### 可使用的开源模型
+### 可支持的本地离线开源模型
 
 以中文大模型为主，现集成的大模型如下：
 - Baichuan2-13B-Chat
