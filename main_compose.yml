@@ -1,0 +1,32 @@
+version: "3"
+services:
+  backend:
+    build:
+      context: .
+    container_name: backend
+    volumes:
+      - .:/baichuan
+    networks:
+      - llm
+    ports:
+      - "8890:5000"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        pip install -r req.txt --default-timeout=5000  -i https://pypi.tuna.tsinghua.edu.cn/simple
+        uvicorn main:app --host 0.0.0.0 --port 5000
+  frontend:
+    build:
+      context: ./chatgpt-next-web
+    container_name: frontend
+    networks:
+      - llm
+    ports:
+      - 3000:3000
+    environment:
+      - BASE_URL=http://192.168.31.20:8890
+
+networks:
+  llm:
+    external: true
