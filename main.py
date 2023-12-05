@@ -52,7 +52,7 @@ async def list_models():
 async def create_chat_completion(request: ChatCompletionRequest):
     model_splits = request.model.split('__', 1)
     if len(model_splits) != 2:
-        raise ValueError(f"model name error: {request.model}")
+        raise HTTPException(status_code=400, detail=f"model name error: {request.model}")
     prefix, checkpoint_id = model_splits
     if prefix.startswith('Baichuan'):
         model = MODEL_DICT["baichuan"]
@@ -61,7 +61,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
         model = MODEL_DICT["chatglm"]
         model_type = "chatglm"
     else:
-        raise ValueError(f"unsupported model type: {prefix}")
+        raise HTTPException(status_code=400, detail=f"unsupported model type: {prefix}")
 
     logger.info(f"==== model type  ==== \n{model_type}")
 
