@@ -21,7 +21,7 @@ from param_model import (
 from sse_starlette.sse import EventSourceResponse
 
 
-MODEL_DICT = get_models("chatglm", "baichuan")
+MODEL_DICT = get_models("baichuan")
 
 
 @asynccontextmanager

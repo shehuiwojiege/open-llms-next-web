@@ -5,7 +5,7 @@ services:
       context: .
     container_name: backend
     volumes:
-      - .:/baichuan
+      - .:/open-llms-next-web
     networks:
       - llm
     ports:
