@@ -3,10 +3,11 @@ from loguru import logger
 from utils import (
     process_msg,
 )
-from llms import MODEL_DICT
+from llms import obj_models
 from param_model import (
     ModelCard,
     ModelList,
+    ChatMessage,
     DeltaMessage,
     ChatCompletionRequest,
     ChatCompletionResponse,
@@ -27,18 +28,17 @@ async def create_chat_completion(request: ChatCompletionRequest):
         raise HTTPException(status_code=400, detail=f"model name error: {request.model}")
     prefix, checkpoint_id = model_splits
     if prefix.startswith('chatglm'):
-        model = MODEL_DICT["chatglm"]
-        model_type = "chatglm"
+        model = obj_models.chatglm
     elif prefix.startswith('Baichuan'):
-        model = MODEL_DICT["baichuan"]
-        model_type = "baichuan"
+        model = obj_models.baichuan
     elif prefix.startswith("Qwen"):
-        model = MODEL_DICT["qwen2"]
-        model_type = "qwen2"
+        model = obj_models.qwen2
     else:
         raise HTTPException(status_code=400, detail=f"unsupported model type: {prefix}")
+    if model is None:
+        raise HTTPException(status_code=400, detail=f"unsupported model type: {prefix}")
 
-    logger.info(f"==== model type  ==== \n{model_type}")
+    logger.info(f"==== model type  ==== \n{model.dtype}")
 
     if len(request.messages) < 1 or request.messages[-1].role == "assistant":
         raise HTTPException(status_code=400, detail="Invalid request")
@@ -55,7 +55,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
         functions=request.functions,
     )
     if request.stream:
-        generate = predict(model_type, checkpoint_id, gen_params)
+        generate = predict(model.dtype, checkpoint_id, gen_params)
         return EventSourceResponse(generate, media_type="text/event-stream")
 
     messages = process_msg(request.messages)
@@ -69,8 +69,11 @@ async def create_chat_completion(request: ChatCompletionRequest):
         generate_config.max_tokens = request.max_tokens
     if request.repetition_penalty:
         generate_config.repetition_penalty = request.repetition_penalty
-
-    res_text = model.chat(checkpoint_id, messages, generate_config, stream=False)
+    try:
+        res_text = model.chat(checkpoint_id, messages, generate_config, stream=False)
+    except Exception as e:
+        logger.error(f"model chat error\n{e}\n")
+        raise HTTPException(status_code=400, detail=f"model chat error\n{e}\n")
 
     message = ChatMessage(
         role="assistant",
@@ -85,14 +88,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
     return ChatCompletionResponse(model=request.model, choices=[choice_data], object="chat.completion", usage=None)
 
 
-async def predict(model_type, checkpoint_id, params: dict):
-    if model_type == "baichuan":
-        model = MODEL_DICT["baichuan"]
-    elif model_type == "qwen2":
-        model = MODEL_DICT["qwen2"]
-    else:
-        model = MODEL_DICT["chatglm"]
-
+async def predict(model, checkpoint_id, params: dict):
     choice_data = ChatCompletionResponseStreamChoice(
         index=0,
         delta=DeltaMessage(role="assistant"),
@@ -117,7 +113,11 @@ async def predict(model_type, checkpoint_id, params: dict):
 
     messages = process_msg(params["messages"])
     # logger.debug(f"==== messages ====\n{messages}")
-    streamer = model.chat(checkpoint_id, messages, generation_config=gen_config)
+    try:
+        streamer = model.chat(checkpoint_id, messages, generation_config=gen_config)
+    except Exception as e:
+        logger.error(f"model chat error\n{e}\n")
+        raise HTTPException(status_code=400, detail=f"model chat error\n{e}\n")
     # current = ""
 
     for token in streamer:

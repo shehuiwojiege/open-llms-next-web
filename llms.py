@@ -1,11 +1,11 @@
 import torch
 # from queue import Queue
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Callable, Tuple
 from peft import PeftModel
 from loguru import logger
 # from threading import Thread
 from typing import Dict
-from transformers import GenerationConfig, PreTrainedTokenizer
+from transformers import GenerationConfig, PreTrainedTokenizer, PreTrainedModel
 from transformers_stream_generator.main import StreamGenerationConfig
 from transformers.generation.stopping_criteria import (
     StoppingCriteriaList,
@@ -34,8 +34,12 @@ class StoppingCriteria(_StoppingCriteria):
         return input_ids[0].tolist()[-1] in self.stop_token_ids
 
 
-class LLMS:
-    def __init__(self, model_type, model, tokenizer, adapters):
+class LLM:
+    def __init__(self,
+                 model_type: str,
+                 model: PreTrainedModel,
+                 tokenizer: PreTrainedTokenizer,
+                 adapters: List[str]):
         self.__model_type = model_type
         self.__model = model
         self.__tokenizer = tokenizer
@@ -101,7 +105,11 @@ class LLMS:
             )
         )
 
-    def _qwen2_chat(self, tokenizer, messages, generation_config: Optional[GenerationConfig] = None, stream: bool = True):
+    def _qwen2_chat(self,
+                    tokenizer: PreTrainedTokenizer,
+                    messages: List[Dict],
+                    generation_config: Optional[GenerationConfig] = None,
+                    stream: bool = True):
         text = tokenizer.apply_chat_template(
             messages,
             tokenize=False,
@@ -117,7 +125,11 @@ class LLMS:
             response = tokenizer.decode(outputs[0][len(inputs["input_ids"][0]):], skip_special_tokens=True)
         return response
 
-    def _chatglm_chat(self, tokenizer, messages, generation_config: Optional[GenerationConfig] = None, stream: bool = True) -> Union[ChatStreamer, str]:
+    def _chatglm_chat(self,
+                      tokenizer: PreTrainedTokenizer,
+                      messages: List[Dict],
+                      generation_config: Optional[GenerationConfig] = None,
+                      stream: bool = True) -> Union[ChatStreamer, str]:
         query, role = messages[-1]["content"], messages[-1]["role"]
         history = messages[:-1]
         # 旧版 ---> 已舍弃
@@ -140,8 +152,16 @@ class LLMS:
     def generation_config(self):
         return self.__model.generation_config
 
+    @property
+    def dtype(self):
+        return self.__model_type
+
     @torch.inference_mode()
-    def chat(self, checkpoint_id: str, messages: List, generation_config: Optional[GenerationConfig] = None, stream: bool = True):
+    def chat(self,
+             checkpoint_id: str,
+             messages: List[Dict],
+             generation_config: Optional[GenerationConfig] = None,
+             stream: bool = True):
         logger.info(f"=== checkpoint_id ====\n{checkpoint_id}\n")
         logger.info(f"==== messages ====\n{messages}\n")
         assert checkpoint_id in self.__adapters, f'{checkpoint_id} is not exists'
@@ -168,11 +188,31 @@ class LLMS:
         return self.__model.chat(self.__tokenizer, messages, stream=stream, generation_config=generation_config)
 
 
-MODEL_DICT: Dict[str, LLMS] = None
+class LLMD:
+    __MODEL_D: Dict[str, LLM] = dict()
+
+    def register(self, model_list: List[Tuple[Union[str, LLM, Callable]]]):
+        for name, model_or_func in model_list:
+            assert isinstance(model_or_func, (LLM, Callable))
+            if isinstance(model_or_func, LLM):
+                self(name, model_or_func)
+            else:
+                self(name, LLM(**model_or_func()))
+
+    def __call__(self, model_name: str, model: LLM):
+        if model_name in self.__MODEL_D:
+            raise ValueError(f"The model name {model_name} already exists, please change one.")
+        self.__MODEL_D[model_name] = model
+
+    def __getattr__(self, model_name: str) -> Union[LLM, None]:
+        return self.__MODEL_D.get(model_name)
+
+
+obj_models = LLMD()
 
 
 def load_custom_models(*model_names):
-    global MODEL_DICT
+    global obj_models
     from utils import (
         get_qwen2,
         get_chatglm,
@@ -183,8 +223,9 @@ def load_custom_models(*model_names):
         "baichuan": get_baichuan,
         "qwen2": get_qwen2,
     }
-    MODEL_DICT = {name: LLMS(**model_dict[name]()) for name in model_names}
-
+    obj_models.register(
+        [(name, model_dict[name]) for name in model_names if name in model_dict]
+    )
 
 '''
 # 旧版 ChatStreamer

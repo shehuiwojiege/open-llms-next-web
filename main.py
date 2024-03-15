@@ -13,7 +13,7 @@ languages = [Language.CHINESE, Language.ENGLISH, Language.JAPANESE]
 detector = LanguageDetectorBuilder.from_languages(*languages).build()
 
 # 加载模型
-load_custom_models("qwen2")
+load_custom_models("chatglm", "qwen2")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # collects GPU memory
@@ -33,36 +33,36 @@ app.add_middleware(
 )
 
 '''the following interfaces are not public'''
-# from posts_api import (
-#     copy_writing,
-#     create_chat,
-#     create_comment,
-#     acquire_prompt,
-#     create_translate,
-# )
-# app.post(
-#     '/v1/copywriting',
-#     response_model=BaseResponse)(copy_writing)
-# app.post(
-#     '/api/gpt/comments',
-#     summary="帖子评论",
-#     operation_id="create_comment",
-#     response_model=BaseResponse)(create_comment)
-# app.get(
-#     "/api/gpt/prompts",
-#     summary="获取预置提示词",
-#     operation_id="acquire_prompt",
-#     response_model=BaseResponse)(acquire_prompt)
-# app.post(
-#     '/api/gpt/trans',
-#     summary="文本翻译",
-#     operation_id="create_translate",
-#     response_model=BaseResponse)(create_translate)
-# app.post(
-#     '/api/gpt/chat/completions',
-#     summary="与gpt对话",
-#     operation_id="create_chat",
-#     response_model=ChatCompletionResponse)(create_chat)
+from posts_api import (
+    copy_writing,
+    create_chat,
+    create_comment,
+    acquire_prompt,
+    create_translate,
+)
+app.post(
+    '/v1/copywriting',
+    response_model=BaseResponse)(copy_writing)
+app.post(
+    '/api/gpt/comments',
+    summary="帖子评论",
+    operation_id="create_comment",
+    response_model=BaseResponse)(create_comment)
+app.get(
+    "/api/gpt/prompts",
+    summary="获取预置提示词",
+    operation_id="acquire_prompt",
+    response_model=BaseResponse)(acquire_prompt)
+app.post(
+    '/api/gpt/trans',
+    summary="文本翻译",
+    operation_id="create_translate",
+    response_model=BaseResponse)(create_translate)
+app.post(
+    '/api/gpt/chat/completions',
+    summary="与gpt对话",
+    operation_id="create_chat",
+    response_model=ChatCompletionResponse)(create_chat)
 
 '''openai api'''
 from openai_api import create_chat_completion, list_models
@@ -75,4 +75,4 @@ app.post(
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+    uvicorn.run(app, host="0.0.0.0", port=5000, reload=True)

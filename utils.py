@@ -2,7 +2,6 @@ import os, torch
 import ahocorasick
 from peft import PeftModel
 from loguru import logger
-from llms import LLMS
 from transformers import (
     AutoModel,
     AutoModelForCausalLM,
