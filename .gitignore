@@ -1,5 +1,4 @@
-llms/baichuan/*
-llms/chatglm/*
+llms/*
 posts_api.py
 completions.txt
 prompts.txt
