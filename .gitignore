@@ -1,3 +1,5 @@
+.idea
+__pycache__
 llms/baichuan/*
 llms/chatglm/*
 llms/qwen2/*
