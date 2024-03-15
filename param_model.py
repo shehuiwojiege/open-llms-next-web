@@ -84,6 +84,10 @@ class CommentPayload(BaseModel):
     image: List[str] = None
 
 
+class GenderPayload(BaseModel):
+    name: str
+
+
 class BaseResponse(BaseModel):
     object: Literal["list", "dict", "str"]
     data: Any

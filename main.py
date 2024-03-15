@@ -36,13 +36,17 @@ app.add_middleware(
 from posts_api import (
     copy_writing,
     create_chat,
+    create_gender,
     create_comment,
     acquire_prompt,
     create_translate,
 )
 app.post(
-    '/v1/copywriting',
+    '/api/gpt/copywriting',
     response_model=BaseResponse)(copy_writing)
+app.post(
+    '/api/gpt/gender',
+    response_model=BaseResponse)(create_gender)
 app.post(
     '/api/gpt/comments',
     summary="帖子评论",

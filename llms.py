@@ -109,7 +109,7 @@ class LLM:
                     tokenizer: PreTrainedTokenizer,
                     messages: List[Dict],
                     generation_config: Optional[GenerationConfig] = None,
-                    stream: bool = True):
+                    stream: bool = True) -> Union[ChatStreamer, str]:
         text = tokenizer.apply_chat_template(
             messages,
             tokenize=False,
@@ -161,7 +161,7 @@ class LLM:
              checkpoint_id: str,
              messages: List[Dict],
              generation_config: Optional[GenerationConfig] = None,
-             stream: bool = True):
+             stream: bool = True) -> Union[ChatStreamer, str]:
         logger.info(f"=== checkpoint_id ====\n{checkpoint_id}\n")
         logger.info(f"==== messages ====\n{messages}\n")
         assert checkpoint_id in self.__adapters, f'{checkpoint_id} is not exists'
