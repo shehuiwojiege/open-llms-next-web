@@ -55,7 +55,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
         functions=request.functions,
     )
     if request.stream:
-        generate = predict(model.dtype, checkpoint_id, gen_params)
+        generate = predict(model, checkpoint_id, gen_params)
         return EventSourceResponse(generate, media_type="text/event-stream")
 
     messages = process_msg(request.messages)
