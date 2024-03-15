@@ -41,6 +41,13 @@ docker compose -f main_compose.yml up
 - 本项目使用的前端是[ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web)；
 - 感谢以上两个项目作者的无私奉献。
 
+## 鸣谢
+
+### 捐赠者
+
+> 捐赠按时间排序，与金额无关
+
+
 ### 使用问题请联系我
 
 遇到使用的BUG或困难请联系我，也可以提issues，微信联系请注明来由。

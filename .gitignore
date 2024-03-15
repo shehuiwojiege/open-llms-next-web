@@ -1,2 +1,6 @@
 llms/baichuan/*
 llms/chatglm/*
+posts_api.py
+completions.txt
+prompts.txt
+Dockerfile.v1

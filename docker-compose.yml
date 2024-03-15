@@ -23,16 +23,6 @@ services:
       - -c
       - |
         uvicorn main:app --host 0.0.0.0 --port 5000
-  frontend:
-    build:
-      context: ./chatgpt-next-web
-    container_name: frontend
-    networks:
-      - llm
-    ports:
-      - 3000:3000
-    environment:
-      - BASE_URL=http://192.168.31.20:5000
 
 networks:
   llm:

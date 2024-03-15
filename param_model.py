@@ -1,6 +1,6 @@
 import time
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional, Literal, Union
+from typing import List, Dict, Optional, Literal, Union, Any
 
 
 class ModelCard(BaseModel):
@@ -39,13 +39,13 @@ class DeltaMessage(BaseModel):
 class ChatCompletionRequest(BaseModel):
     model: str
     messages: List[ChatMessage]
-    temperature: Optional[float] = 0.3
-    top_p: Optional[float] = 0.85
-    max_tokens: Optional[int] = 512
+    temperature: Optional[float] = None
+    top_p: Optional[float] = None
+    max_tokens: Optional[int] = None
     stream: Optional[bool] = False
     functions: Optional[Union[dict, List[dict]]] = None
     # Additional parameters
-    repetition_penalty: Optional[float] = 1.05
+    repetition_penalty: Optional[float] = None
 
 
 class ChatCompletionResponseChoice(BaseModel):
@@ -72,3 +72,23 @@ class ChatCompletionResponse(BaseModel):
     choices: List[Union[ChatCompletionResponseChoice, ChatCompletionResponseStreamChoice]]
     created: Optional[int] = Field(default_factory=lambda: int(time.time()))
     usage: Optional[UsageInfo] = None
+
+
+class CopyWritingPayload(BaseModel):
+    model: str = "chatglm3-6b__baseline"
+    prompt: str
+
+
+class CommentPayload(BaseModel):
+    text: str
+    image: List[str] = None
+
+
+class BaseResponse(BaseModel):
+    object: Literal["list", "dict", "str"]
+    data: Any
+
+
+class TransPayload(BaseModel):
+    content: str
+    to: Literal["en", "ja", "zh-tw"]
