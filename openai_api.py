@@ -43,9 +43,10 @@ async def create_chat_completion(request: ChatCompletionRequest):
     if len(request.messages) < 1 or request.messages[-1].role == "assistant":
         raise HTTPException(status_code=400, detail="Invalid request")
 
+    messages = process_msg(request.messages)
     gen_params = dict(
         model=request.model,
-        messages=request.messages,
+        messages=messages,
         temperature=request.temperature,
         top_p=request.top_p,
         max_tokens=request.max_tokens or 512,
@@ -58,7 +59,6 @@ async def create_chat_completion(request: ChatCompletionRequest):
         generate = predict(model, checkpoint_id, gen_params)
         return EventSourceResponse(generate, media_type="text/event-stream")
 
-    messages = process_msg(request.messages)
     # logger.debug(f"==== messages ====\n{messages}")
     generate_config = model.generation_config
     if request.temperature:
@@ -111,7 +111,7 @@ async def predict(model, checkpoint_id, params: dict):
     if params["repetition_penalty"]:
         gen_config.repetition_penalty = params["repetition_penalty"]
 
-    messages = process_msg(params["messages"])
+    messages = params["messages"]
     # logger.debug(f"==== messages ====\n{messages}")
     try:
         streamer = model.chat(checkpoint_id, messages, generation_config=gen_config)
