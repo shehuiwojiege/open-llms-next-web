@@ -32,38 +32,39 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from posts_api import (
-    copy_writing,
-    create_chat,
-    create_comment,
-    acquire_prompt,
-    create_translate,
-)
-app.post(
-    '/v1/copywriting',
-    response_model=BaseResponse)(copy_writing)
-app.post(
-    '/api/gpt/comments',
-    summary="帖子评论",
-    operation_id="create_comment",
-    response_model=BaseResponse)(create_comment)
-app.get(
-    "/api/gpt/prompts",
-    summary="获取预置提示词",
-    operation_id="acquire_prompt",
-    response_model=BaseResponse)(acquire_prompt)
-app.post(
-    '/api/gpt/trans',
-    summary="文本翻译",
-    operation_id="create_translate",
-    response_model=BaseResponse)(create_translate)
-app.post(
-    '/api/gpt/chat/completions',
-    summary="与gpt对话",
-    operation_id="create_chat",
-    response_model=ChatCompletionResponse)(create_chat)
+'''the following interfaces are not public'''
+# from posts_api import (
+#     copy_writing,
+#     create_chat,
+#     create_comment,
+#     acquire_prompt,
+#     create_translate,
+# )
+# app.post(
+#     '/v1/copywriting',
+#     response_model=BaseResponse)(copy_writing)
+# app.post(
+#     '/api/gpt/comments',
+#     summary="帖子评论",
+#     operation_id="create_comment",
+#     response_model=BaseResponse)(create_comment)
+# app.get(
+#     "/api/gpt/prompts",
+#     summary="获取预置提示词",
+#     operation_id="acquire_prompt",
+#     response_model=BaseResponse)(acquire_prompt)
+# app.post(
+#     '/api/gpt/trans',
+#     summary="文本翻译",
+#     operation_id="create_translate",
+#     response_model=BaseResponse)(create_translate)
+# app.post(
+#     '/api/gpt/chat/completions',
+#     summary="与gpt对话",
+#     operation_id="create_chat",
+#     response_model=ChatCompletionResponse)(create_chat)
 
-# openai api
+'''openai api'''
 from openai_api import create_chat_completion, list_models
 app.get(
     '/v1/models',
