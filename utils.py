@@ -39,9 +39,9 @@ def auto_download(model_type: str, revision: str = None, repair_name: str = None
             raise ValueError(f'Model {model_id} is not finished downloading.')
         repair_path = Path(repair_name)
         if repair_path.parent != ".":
-            model_path.parent.rename(os.path.join(cache_dir, repair_path.parent.name))
-            model_path = Path(os.path.join(cache_dir, repair_path.parent.name)) / Path(repair_path.name)
-        model_path.rename(os.path.join(model_path.parent.name, repair_path.name))
+            model_path.parent.rename(repair_path.parent.absolute())
+            model_path = repair_path.parent / Path(model_path.name)
+        model_path.rename(repair_path.absolute())
 
 
 def get_bge_large_zh():
