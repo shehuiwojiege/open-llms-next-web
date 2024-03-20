@@ -38,8 +38,8 @@ class LLM:
     def __init__(self,
                  model_type: str,
                  model: PreTrainedModel,
-                 tokenizer: PreTrainedTokenizer,
-                 adapters: List[str]):
+                 tokenizer: Optional[PreTrainedTokenizer] = None,
+                 adapters: Optional[List[str]] = None):
         self.__model_type = model_type
         self.__model = model
         self.__tokenizer = tokenizer

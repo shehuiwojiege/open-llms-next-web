@@ -40,6 +40,7 @@ def auto_download(model_type: str, revision: str = None, repair_name: str = None
         repair_path = Path(repair_name)
         if repair_path.parent != ".":
             model_path.parent.rename(os.path.join(cache_dir, repair_path.parent.name))
+            model_path = Path(os.path.join(cache_dir, repair_path.parent.name)) / Path(repair_path.name)
         model_path.rename(os.path.join(model_path.parent.name, repair_path.name))
 
 
