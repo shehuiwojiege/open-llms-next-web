@@ -6,4 +6,5 @@ llms/qwen2/*
 posts_api.py
 completions.txt
 prompts.txt
+data_simple.jsonl
 Dockerfile.v1

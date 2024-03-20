@@ -187,6 +187,25 @@ class LLM:
                 generation_config=generation_config)
         return self.__model.chat(self.__tokenizer, messages, stream=stream, generation_config=generation_config)
 
+    def embedding(self, inputs: List[str], multi_process=False) -> List[List[float]]:
+        assert self.__model_type == "embedding"
+        import sentence_transformers
+        inputs = list(map(lambda x: x.replace("\n", " "), inputs))
+        if multi_process:
+            pool = self.__model.start_multi_process_pool()
+            embeddings = self.__model.encode_multi_process(inputs, pool)
+            sentence_transformers.SentenceTransformer.stop_multi_process_pool(pool)
+        else:
+            embeddings = self.__model.encode(inputs)
+        return embeddings.tolist()
+
+    def rerank(self,query: str, docs: List[str]) -> Tuple[List[str], List[float]]:
+        assert self.__model_type == "reranker"
+        sentence_pairs = [[query, doc] for doc in docs]
+        results = self.__model.predict(sentences=sentence_pairs,  convert_to_tensor=True)
+        scores, indices = results.topk(len(results))
+        return [docs[i] for i in indices], scores
+
 
 class LLMD:
     __MODEL_D: Dict[str, LLM] = dict()
@@ -217,11 +236,15 @@ def load_custom_models(*model_names):
         get_qwen2,
         get_chatglm,
         get_baichuan,
+        get_bge_large_zh,
+        get_bge_reranker_large,
     )
     model_dict = {
         "chatglm": get_chatglm,
         "baichuan": get_baichuan,
         "qwen2": get_qwen2,
+        "embedding": get_bge_large_zh,
+        'reranker': get_bge_reranker_large,
     }
     obj_models.register(
         [(name, model_dict[name]) for name in model_names if name in model_dict]

@@ -74,6 +74,24 @@ class ChatCompletionResponse(BaseModel):
     usage: Optional[UsageInfo] = None
 
 
+class EmbeddingRequest(BaseModel):
+    input: List[str]
+    model: str
+
+
+class CompletionUsage(BaseModel):
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+
+class EmbeddingResponse(BaseModel):
+    data: list
+    model: str
+    object: str
+    usage: CompletionUsage
+
+
 class CopyWritingPayload(BaseModel):
     model: str = "chatglm3-6b__baseline"
     prompt: str

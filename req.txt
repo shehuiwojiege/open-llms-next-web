@@ -8,6 +8,7 @@ streamlit-modal
 tqdm
 sentencepiece==0.1.99
 transformers
+sentence-transformers
 transformers-stream-generator
 xformers
 ipython

@@ -10,27 +10,73 @@ from transformers import (
 )
 from param_model import ChatMessage
 from typing import List, Dict
-from transformers_stream_generator.main import NewGenerationMixin, StreamGenerationConfig
+from transformers_stream_generator.main import NewGenerationMixin
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_BASE_DIR = os.path.join(BASE_DIR, "llms")
 
 
-def auto_download(model_type: str, revision: str = None):
+def auto_download(model_type: str, revision: str = None, repair_name: str = None):
     from modelscope import snapshot_download
+    cache_dir = f"{MODEL_BASE_DIR}/{model_type}"
     if model_type == "chatglm":
-        snapshot_download("ZhipuAI/chatglm3-6b", revision=revision, cache_dir="llms/chatglm")
+        model_id = "ZhipuAI/chatglm3-6b"
     elif model_type == "baichuan":
-        snapshot_download("baichuan-inc/Baichuan2-13B-Chat", revision=revision, cache_dir="llms/baichuan")
+        model_id = "baichuan-inc/Baichuan2-13B-Chat"
     elif model_type == "qwen2":
-        snapshot_download("qwen/Qwen1.5-7B-Chat", cache_dir="llms/qwen2")
+        model_id = "qwen/Qwen1.5-7B-Chat"
+    elif model_type == "embedding":
+        model_id = "AI-ModelScope/bge-large-zh-v1.5"
+    elif model_type == "reranker":
+        model_id = "quietnight/bge-reranker-large"
+    else:
+        raise ValueError(f'Unsupported model type {model_type} yet.')
+    snapshot_download(model_id, revision=revision, cache_dir=cache_dir)
+    if repair_name is not None:
+        from pathlib import Path
+        model_path = Path(os.path.join(cache_dir, model_id))
+        if not model_path.exists():
+            raise ValueError(f'Model {model_id} is not finished downloading.')
+        repair_path = Path(repair_name)
+        if repair_path.parent != ".":
+            model_path.parent.rename(os.path.join(cache_dir, repair_path.parent.name))
+        model_path.rename(os.path.join(model_path.parent.name, repair_path.name))
+
+
+def get_bge_large_zh():
+    model_type = "embedding"
+    model_name_or_path = f"{model_type}/BAAI/bge-large-zh-v1.5"
+    if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
+        auto_download(model_type, repair_name="BAAI/bge-large-zh-v1.5")
+    logger.info(f'正在加载模型>>>>{model_name_or_path}\n')
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer(model_name_or_path)
+    model = model.eval()
+    return {
+        "model_type": model_type,
+        'model': model,
+    }
+
+
+def get_bge_reranker_large():
+    model_type = "reranker"
+    model_name_or_path = f"{model_type}/BAAI/bge-reranker-large"
+    if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
+        auto_download(model_type, repair_name="BAAI/bge-reranker-large")
+    logger.info(f'正在加载模型>>>>{model_name_or_path}\n')
+    from sentence_transformers import CrossEncoder
+    model = CrossEncoder(model_name_or_path)
+    return {
+        "model_type": model_type,
+        'model': model,
+    }
 
 
 def get_chatglm():
     model_type = "chatglm"
     model_name_or_path = f"{model_type}/ZhipuAI/chatglm3-6b"
     if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
-        auto_download(model_type, revision = "v1.0.2")
+        auto_download(model_type, revision="v1.0.2")
     SFT_MODEL_DIR = os.path.join(MODEL_BASE_DIR, f"{model_type}/ft_models")
     SFT_MODELS = ['baseline']
 
@@ -80,7 +126,7 @@ def get_chatglm():
     model = model.eval()
     logger.info(f"==== sft_models {SFT_MODELS} ====\n")
     return {
-        "model_type": "chatglm",
+        "model_type": model_type,
         "model": model,
         'tokenizer': tokenizer,
         'adapters': SFT_MODELS
@@ -135,7 +181,7 @@ def get_baichuan():
     model = model.eval()
     logger.info(f"==== sft_models {SFT_MODELS} ====\n")
     return {
-        "model_type": "baichuan",
+        "model_type": model_type,
         'model': model,
         'tokenizer': tokenizer,
         'adapters': SFT_MODELS
@@ -147,7 +193,7 @@ def get_qwen2():
     model_type = "qwen2"
     model_name_or_path = f"{model_type}/qwen/Qwen1.5-7B-Chat"
     if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
-        auto_download(model_type)
+        auto_download(model_type, repair_name="Qwen1.5-7B-Chat")
     SFT_MODEL_DIR = os.path.join(MODEL_BASE_DIR, f"{model_type}/ft_models")
     SFT_MODELS = ['baseline']
 
@@ -189,7 +235,7 @@ def get_qwen2():
     model = model.eval()
     logger.info(f"==== sft_models {SFT_MODELS} ====\n")
     return {
-        "model_type": "qwen2",
+        "model_type": model_type,
         'model': model,
         'tokenizer': tokenizer,
         'adapters': SFT_MODELS
