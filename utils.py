@@ -31,13 +31,13 @@ def auto_download(model_type: str, revision: str = None, repair_name: str = None
         model_id = "quietnight/bge-reranker-large"
     else:
         raise ValueError(f'Unsupported model type {model_type} yet.')
-    snapshot_download(model_id, revision=revision, cache_dir=cache_dir)
+    out_dir = snapshot_download(model_id, revision=revision, cache_dir=cache_dir)
     if repair_name is not None:
         from pathlib import Path
-        model_path = Path(os.path.join(cache_dir, model_id))
+        model_path = Path(out_dir)
+        repair_path = Path(os.path.join(cache_dir, repair_name))
         if not model_path.exists():
-            raise ValueError(f'Model {model_id} is not finished downloading.')
-        repair_path = Path(repair_name)
+            raise ValueError(f'Model path {model_path} is not exists.')
         if repair_path.parent != ".":
             model_path.parent.rename(repair_path.parent.absolute())
             model_path = repair_path.parent / Path(model_path.name)
