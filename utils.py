@@ -50,7 +50,7 @@ def get_bge_large_zh():
         auto_download(model_type, repair_name="BAAI/bge-large-zh-v1.5")
     logger.info(f'正在加载模型>>>>{model_name_or_path}\n')
     from sentence_transformers import SentenceTransformer
-    model = SentenceTransformer(model_name_or_path)
+    model = SentenceTransformer(os.path.join(MODEL_BASE_DIR, model_name_or_path))
     model = model.eval()
     return {
         "model_type": model_type,
@@ -65,7 +65,7 @@ def get_bge_reranker_large():
         auto_download(model_type, repair_name="BAAI/bge-reranker-large")
     logger.info(f'正在加载模型>>>>{model_name_or_path}\n')
     from sentence_transformers import CrossEncoder
-    model = CrossEncoder(model_name_or_path)
+    model = CrossEncoder(os.path.join(MODEL_BASE_DIR, model_name_or_path))
     return {
         "model_type": model_type,
         'model': model,

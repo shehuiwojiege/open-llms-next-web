@@ -13,7 +13,7 @@ languages = [Language.CHINESE, Language.ENGLISH, Language.JAPANESE]
 detector = LanguageDetectorBuilder.from_languages(*languages).build()
 
 # 加载模型
-load_custom_models("chatglm", "qwen2")
+load_custom_models("chatglm", "qwen2", "embedding", "reranker")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # collects GPU memory
