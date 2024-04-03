@@ -7,4 +7,4 @@ RUN apt-get install pip -y
 RUN mkdir /open-llms-next-web
 WORKDIR /open-llms-next-web
 ADD req.txt /open-llms-next-web/
-RUN pip install -r req.txt -i https://pypi.mirrors.ustc.edu.cn/simple/
+RUN pip install --no-cache-dir -r req.txt -i https://pypi.mirrors.ustc.edu.cn/simple/

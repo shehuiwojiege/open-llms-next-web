@@ -11,6 +11,7 @@ transformers
 sentence-transformers
 transformers-stream-generator
 xformers
+faiss-gpu
 ipython
 typing-extensions
 typing-inspect

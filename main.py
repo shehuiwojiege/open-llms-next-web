@@ -8,9 +8,6 @@ from param_model import (
     ChatCompletionResponse,
 )
 from llms import load_custom_models
-from lingua import Language, LanguageDetectorBuilder
-languages = [Language.CHINESE, Language.ENGLISH, Language.JAPANESE]
-detector = LanguageDetectorBuilder.from_languages(*languages).build()
 
 # 加载模型
 load_custom_models("chatglm", "qwen2", "embedding", "reranker")
