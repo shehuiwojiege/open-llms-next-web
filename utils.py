@@ -23,8 +23,10 @@ def auto_download(model_type: str, revision: str = None, repair_name: str = None
         model_id = "ZhipuAI/chatglm3-6b"
     elif model_type == "baichuan":
         model_id = "baichuan-inc/Baichuan2-13B-Chat"
-    elif model_type == "qwen2":
+    elif model_type == "qwen":
         model_id = "qwen/Qwen1.5-7B-Chat"
+    elif model_type == "llama":
+        model_id = "LLM-Research/Meta-Llama-3-8B-Instruct"
     elif model_type == "embedding":
         model_id = "AI-ModelScope/bge-large-zh-v1.5"
     elif model_type == "reranker":
@@ -73,7 +75,59 @@ def get_bge_reranker_large():
     }
 
 
-def get_chatglm():
+def get_llama3():
+    model_type = 'llama'
+    model_name_or_path = f"{model_type}/MetaAI/Meta-Llama-3-8B-Instruct"
+    if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
+        auto_download(model_type, repair_name='MetaAI/Meta-Llama-3-8B-Instruct')
+    SFT_MODEL_DIR = os.path.join(MODEL_BASE_DIR, f"{model_type}/ft_models")
+    SFT_MODELS = ['baseline']
+    logger.info(f'正在加载模型>>>>{model_name_or_path}\n')
+    if torch.cuda.is_available():
+        model = AutoModelForCausalLM.from_pretrained(
+            os.path.join(MODEL_BASE_DIR, model_name_or_path),
+            torch_dtype=torch.bfloat16,
+            device_map="auto"
+        )
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            os.path.join(MODEL_BASE_DIR, model_name_or_path))
+    tokenizer = AutoTokenizer.from_pretrained(
+        os.path.join(MODEL_BASE_DIR, model_name_or_path))
+    generation_config = GenerationConfig.from_pretrained(
+        os.path.join(MODEL_BASE_DIR, model_name_or_path))
+    generation_config.max_length = 8192
+    model.generation_config = generation_config
+    model.__class__.generate_stream = NewGenerationMixin.generate
+    model.__class__.sample_stream = NewGenerationMixin.sample_stream
+
+    if os.path.exists(SFT_MODEL_DIR):
+        logger.info(f"==== 正在加载sft模型 ====\n")
+        sft_models = os.listdir(SFT_MODEL_DIR)
+        for model_name in sft_models:
+            model_id = os.path.join(SFT_MODEL_DIR, model_name)
+            try:
+                if isinstance(model, PeftModel):
+                    model.load_adapter(model_id, adapter_name=model_name)
+                else:
+                    model = PeftModel.from_pretrained(model, model_id, adapter_name=model_name)
+            except Exception as e:
+                logger.error(f"---> 加载 {model_id} 失败：{str(e)}\n")
+            else:
+                SFT_MODELS.append(model_name)
+                logger.info(f"---> 加载 {model_id} 成功\n")
+
+    model = model.eval()
+    logger.info(f"==== sft_models {SFT_MODELS} ====\n")
+    return {
+        "model_type": model_type,
+        'model': model,
+        'tokenizer': tokenizer,
+        'adapters': SFT_MODELS
+    }
+
+
+def get_chatglm3():
     model_type = "chatglm"
     model_name_or_path = f"{model_type}/ZhipuAI/chatglm3-6b"
     if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
@@ -134,7 +188,7 @@ def get_chatglm():
     }
 
 
-def get_baichuan():
+def get_baichuan2():
     '''加载百川基座模型'''
     model_type = 'baichuan'
     model_name_or_path = f"{model_type}/baichuan-inc/Baichuan2-13B-Chat"
@@ -191,7 +245,7 @@ def get_baichuan():
 
 def get_qwen2():
     '''加载千问大模型'''
-    model_type = "qwen2"
+    model_type = "qwen"
     model_name_or_path = f"{model_type}/qwen/Qwen1.5-7B-Chat"
     if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
         auto_download(model_type, repair_name="Qwen1.5-7B-Chat")

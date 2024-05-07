@@ -98,6 +98,34 @@ export const KnowledgeCutOffDate: Record<string, string> = {
 
 export const DEFAULT_MODELS = [
     {
+        name: "Meta-Llama-3-8B-Instruct__baseline",
+        available: true,
+    },
+    {
+        name: "Qwen1.5-7B-Chat__baseline",
+        available: true,
+    },
+    {
+        name: "Qwen1.5-7B-Chat__checkpoint-3000",
+        available: true,
+    },
+    {
+        name: "Qwen1.5-7B-Chat__checkpoint-2400",
+        available: true,
+    },
+    {
+        name: "Qwen1.5-7B-Chat__checkpoint-1800",
+        available: true,
+    },
+    {
+        name: "Qwen1.5-7B-Chat__checkpoint-1200",
+        available: true,
+    },
+    {
+        name: "Qwen1.5-7B-Chat__checkpoint-600",
+        available: true,
+    },
+    {
         name: "Baichuan2-13B-Chat__checkpoint-latest",
         available: true,
     },

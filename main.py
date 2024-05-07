@@ -10,7 +10,8 @@ from param_model import (
 from llms import load_custom_models
 
 # 加载模型
-load_custom_models("chatglm", "qwen2", "embedding", "reranker")
+load_custom_models("llama", "qwen", "embedding", "reranker")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # collects GPU memory
@@ -66,13 +67,13 @@ app.post(
     response_model=ChatCompletionResponse)(create_chat)
 
 '''openai api'''
-from openai_api import create_chat_completion, list_models
-app.get(
-    '/v1/models',
-    response_model=ModelList)(list_models)
-app.post(
-    '/v1/chat/completions',
-    response_model=ChatCompletionResponse)(create_chat_completion)
+# from openai_api import create_chat_completion, list_models
+# app.get(
+#     '/v1/models',
+#     response_model=ModelList)(list_models)
+# app.post(
+#     '/v1/chat/completions',
+#     response_model=ChatCompletionResponse)(create_chat_completion)
 
 
 if __name__ == '__main__':

@@ -105,6 +105,26 @@ class LLM:
             )
         )
 
+    def _llama3_chat(self,
+                     tokenizer: PreTrainedTokenizer,
+                     messages: List[Dict],
+                     generation_config: Optional[GenerationConfig] = None,
+                     stream: bool = True) -> Union[ChatStreamer, str]:
+        text = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True
+        )
+        eos_token_id = [tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")]
+        inputs = tokenizer.batch_encode_plus([text], return_tensors="pt").to(self.__model.device)
+        if stream:
+            response = self._stream_chat(inputs, tokenizer, generation_config, eos_token_id)
+        else:
+            outputs = self.__model.generate(**inputs, generation_config=generation_config,
+                                            eos_token_id=eos_token_id)
+            response = tokenizer.decode(outputs[0][len(inputs["input_ids"][0]):], skip_special_tokens=True)
+        return response
+
     def _qwen2_chat(self,
                     tokenizer: PreTrainedTokenizer,
                     messages: List[Dict],
@@ -179,8 +199,14 @@ class LLM:
                 self.__tokenizer, messages,
                 stream=stream,
                 generation_config=generation_config)
-        elif self.__model_type == "qwen2":
+        elif self.__model_type == "qwen":
             return self._qwen2_chat(
+                self.__tokenizer,
+                messages,
+                stream=stream,
+                generation_config=generation_config)
+        elif self.__model_type == "llama":
+            return self._llama3_chat(
                 self.__tokenizer,
                 messages,
                 stream=stream,
@@ -234,15 +260,17 @@ def load_custom_models(*model_names):
     global obj_models
     from utils import (
         get_qwen2,
-        get_chatglm,
-        get_baichuan,
+        get_llama3,
+        get_chatglm3,
+        get_baichuan2,
         get_bge_large_zh,
         get_bge_reranker_large,
     )
     model_dict = {
-        "chatglm": get_chatglm,
-        "baichuan": get_baichuan,
-        "qwen2": get_qwen2,
+        "chatglm": get_chatglm3,
+        "baichuan": get_baichuan2,
+        "qwen": get_qwen2,
+        "llama": get_llama3,
         "embedding": get_bge_large_zh,
         'reranker': get_bge_reranker_large,
     }

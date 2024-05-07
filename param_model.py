@@ -48,6 +48,10 @@ class ChatCompletionRequest(BaseModel):
     repetition_penalty: Optional[float] = None
 
 
+class TouristSceneRequest(BaseModel):
+    messages: List[ChatMessage]
+
+
 class ChatCompletionResponseChoice(BaseModel):
     index: int
     message: ChatMessage

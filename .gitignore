@@ -8,3 +8,5 @@ completions.txt
 prompts.txt
 data_simple.jsonl
 Dockerfile.v1
+prompt_ja.txt
+web_demo.py
