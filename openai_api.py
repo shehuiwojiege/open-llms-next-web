@@ -27,7 +27,6 @@ async def create_chat_completion(request: ChatCompletionRequest):
     if len(model_splits) != 2:
         raise HTTPException(status_code=400, detail=f"model name error: {request.model}")
     prefix, checkpoint_id = model_splits
-    print(prefix, checkpoint_id)
     if prefix.startswith('chatglm'):
         model = obj_models.chatglm
     elif prefix.startswith('Baichuan'):
@@ -38,7 +37,6 @@ async def create_chat_completion(request: ChatCompletionRequest):
         model = obj_models.llama
     else:
         raise HTTPException(status_code=400, detail=f"unsupported model type: {prefix}")
-    print(model)
     if model is None:
         raise HTTPException(status_code=400, detail=f"unsupported model type: {prefix}")
 
