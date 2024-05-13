@@ -240,12 +240,15 @@ class LLMD:
     __MODEL_D: Dict[str, LLM] = dict()
 
     def register(self, model_list: List[Tuple[Union[str, LLM, Callable]]]):
-        for name, model_or_func in model_list:
+        for name, model_or_func, size in model_list:
             assert isinstance(model_or_func, (LLM, Callable))
             if isinstance(model_or_func, LLM):
                 self(name, model_or_func)
             else:
-                self(name, LLM(**model_or_func()))
+                if size is not None:
+                    self(name, LLM(**model_or_func(size=size)))
+                else:
+                    self(name, LLM(**model_or_func()))
 
     def __call__(self, model_name: str, model: LLM):
         if model_name in self.__MODEL_D:
@@ -277,8 +280,13 @@ def load_custom_models(*model_names):
         "embedding": get_bge_large_zh,
         'reranker': get_bge_reranker_large,
     }
+    model_size_dict = {
+        'baichuan': '7B',
+        'qwen': '7B',
+        'llama': '8B',
+    }
     obj_models.register(
-        [(name, model_dict[name]) for name in model_names if name in model_dict]
+        [(name, model_dict[name], model_size_dict.get(name)) for name in model_names if name in model_dict]
     )
 
 '''
