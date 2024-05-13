@@ -1,4 +1,4 @@
-import os, torch
+import os, torch, time
 import ahocorasick
 from peft import PeftModel
 from loguru import logger
@@ -17,6 +17,16 @@ MODEL_BASE_DIR = os.path.join(BASE_DIR, "llms")
 
 
 def auto_download(model_type: str, revision: str = None, size: str = None, repair_name: str = None):
+    def wait_for_rename(old_name, new_name, retries=10, delay=2):
+        if os.path.exists(old_name):
+            os.rename(old_name, new_name)
+            for _ in range(retries):
+                if os.path.exists(new_name):
+                    return True
+                time.sleep(delay)
+            return False
+        else:
+            return False
     from modelscope import snapshot_download
     cache_dir = f"{MODEL_BASE_DIR}/{model_type}"
     if model_type == "chatglm":
@@ -37,13 +47,14 @@ def auto_download(model_type: str, revision: str = None, size: str = None, repai
     if repair_name is not None:
         from pathlib import Path
         model_path = Path(out_dir)
-        repair_path = Path(os.path.join(cache_dir, repair_name))
+        repair_path = Path(repair_name)
         if not model_path.exists():
             raise ValueError(f'Model path {model_path} is not exists.')
-        if repair_path.parent != ".":
-            model_path.parent.rename(repair_path.parent.absolute())
-            model_path = repair_path.parent / Path(model_path.name)
-        model_path.rename(repair_path.absolute())
+        wait_for_rename(model_path.absolute(), os.path.join(model_path.parent.absolute(), repair_path.name))
+        if repair_path.parent.name:
+            parent_repair = Path(os.path.join(cache_dir, repair_path.parent.name))
+            if not os.path.exists(parent_repair):
+                wait_for_rename(model_path.parent.absolute(), parent_repair)
 
 
 def get_bge_large_zh():
@@ -81,7 +92,7 @@ def get_llama3(size="8B"):
     model_type = 'llama'
     assert size in ['8B', '70B']
     model_name_or_path = f"{model_type}/MetaAI/Meta-Llama-3-{size}-Instruct"
-    if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
+    if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path, 'config.json')):
         auto_download(model_type, size=size, repair_name=f'MetaAI/Meta-Llama-3-{size}-Instruct')
     SFT_MODEL_DIR = os.path.join(MODEL_BASE_DIR, f"{model_type}/ft_models")
     SFT_MODELS = ['baseline']
@@ -133,7 +144,7 @@ def get_llama3(size="8B"):
 def get_chatglm3():
     model_type = "chatglm"
     model_name_or_path = f"{model_type}/ZhipuAI/chatglm3-6b"
-    if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
+    if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path, 'config.json')):
         auto_download(model_type, revision="v1.0.2")
     SFT_MODEL_DIR = os.path.join(MODEL_BASE_DIR, f"{model_type}/ft_models")
     SFT_MODELS = ['baseline']
@@ -196,7 +207,7 @@ def get_baichuan2(size='7B'):
     model_type = 'baichuan'
     assert size in ['7B', '14B']
     model_name_or_path = f"{model_type}/baichuan-inc/Baichuan2-{size}-Chat"
-    if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
+    if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path, 'config.json')):
         auto_download(model_type, revision="v2.0.1", size=size)
     SFT_MODEL_DIR = os.path.join(MODEL_BASE_DIR, f"{model_type}/ft_models")
     SFT_MODELS = ['baseline']
@@ -252,8 +263,8 @@ def get_qwen2(size='7B'):
     model_type = "qwen"
     assert size in ['0.5B', '1.8B', '4B', '7B', '14B', '32B', '72B', '110B']
     model_name_or_path = f"{model_type}/qwen/Qwen1.5-{size}-Chat"
-    if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
-        auto_download(model_type, size=size, repair_name=f"Qwen1.5-{size}-Chat")
+    if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path, 'config.json')):
+        auto_download(model_type, size=size, repair_name=f"qwen/Qwen1.5-{size}-Chat")
     SFT_MODEL_DIR = os.path.join(MODEL_BASE_DIR, f"{model_type}/ft_models")
     SFT_MODELS = ['baseline']
 

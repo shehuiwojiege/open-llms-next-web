@@ -11,7 +11,7 @@ from param_model import (
 from llms import load_custom_models
 
 # 加载模型
-load_custom_models("llama", "qwen", "embedding", "reranker")
+load_custom_models("qwen", "embedding", "reranker")
 
 
 @asynccontextmanager

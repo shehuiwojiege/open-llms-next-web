@@ -282,7 +282,7 @@ def load_custom_models(*model_names):
     }
     model_size_dict = {
         'baichuan': '7B',
-        'qwen': '7B',
+        'qwen': '0.5B',
         'llama': '8B',
     }
     obj_models.register(

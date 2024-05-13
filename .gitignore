@@ -1,8 +1,9 @@
 .idea
 __pycache__
+llms/embedding/*
 llms/baichuan/*
 llms/chatglm/*
-llms/qwen2/*
+llms/qwen/*
 posts_api.py
 completions.txt
 prompts.txt
