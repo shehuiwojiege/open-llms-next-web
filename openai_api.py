@@ -155,7 +155,7 @@ async def predict(model, checkpoint_id, params: dict):
 
 async def create_embeddings(request: EmbeddingPayload):
     embeddings = obj_models.embedding.embedding(request.input)
-    data = [Embedding(embedding=emb, index=i) for i, emb in enumerate(embeddings)]
+    data = [Embedding(embedding=emb, index=i, object='embedding') for i, emb in enumerate(embeddings)]
 
     def num_tokens_from_string(string: str) -> int:
         """
@@ -175,4 +175,5 @@ async def create_embeddings(request: EmbeddingPayload):
         data=data,
         model=request.model,
         usage=usage,
+        object='list',
     )
