@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from param_model import (
     ModelList,
     BaseResponse,
+    CreateEmbeddingResponse,
     ChatCompletionResponse,
 )
 from llms import load_custom_models
@@ -67,13 +68,16 @@ app.post(
     response_model=ChatCompletionResponse)(create_chat)
 
 '''openai api'''
-# from openai_api import create_chat_completion, list_models
-# app.get(
-#     '/v1/models',
-#     response_model=ModelList)(list_models)
-# app.post(
-#     '/v1/chat/completions',
-#     response_model=ChatCompletionResponse)(create_chat_completion)
+from openai_api import create_chat_completion, list_models, create_embeddings
+app.get(
+    '/v1/models',
+    response_model=ModelList)(list_models)
+app.post(
+    '/v1/embeddings',
+    response_model=CreateEmbeddingResponse)(create_embeddings)
+app.post(
+    '/v1/chat/completions',
+    response_model=ChatCompletionResponse)(create_chat_completion)
 
 
 if __name__ == '__main__':

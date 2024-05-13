@@ -55,9 +55,11 @@ def get_bge_large_zh():
     from sentence_transformers import SentenceTransformer
     model = SentenceTransformer(os.path.join(MODEL_BASE_DIR, model_name_or_path))
     model = model.eval()
+    tokenizer = AutoTokenizer.from_pretrained(os.path.join(MODEL_BASE_DIR, model_name_or_path))
     return {
         "model_type": model_type,
         'model': model,
+        'tokenizer': tokenizer,
     }
 
 

@@ -225,7 +225,10 @@ class LLM:
             embeddings = self.__model.encode(inputs)
         return embeddings.tolist()
 
-    def rerank(self,query: str, docs: List[str]) -> Tuple[List[str], List[float]]:
+    def tokenize(self, inputs: List[str]):
+        return [self.__tokenizer.encode(text) for text in inputs]
+
+    def rerank(self, query: str, docs: List[str]) -> Tuple[List[str], List[float]]:
         assert self.__model_type == "reranker"
         sentence_pairs = [[query, doc] for doc in docs]
         results = self.__model.predict(sentences=sentence_pairs,  convert_to_tensor=True)

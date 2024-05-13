@@ -9,7 +9,11 @@ from param_model import (
     ModelList,
     ChatMessage,
     DeltaMessage,
+    Embedding,
+    CompletionUsage,
+    EmbeddingPayload,
     ChatCompletionRequest,
+    CreateEmbeddingResponse,
     ChatCompletionResponse,
     ChatCompletionResponseChoice,
     ChatCompletionResponseStreamChoice,
@@ -147,3 +151,28 @@ async def predict(model, checkpoint_id, params: dict):
     chunk = ChatCompletionResponse(model=params["model"], choices=[choice_data], object="chat.completion.chunk")
     yield "{}".format(chunk.json(exclude_unset=True))
     yield '[DONE]'
+
+
+async def create_embeddings(request: EmbeddingPayload):
+    embeddings = obj_models.embedding.embedding(request.input)
+    data = [Embedding(embedding=emb, index=i) for i, emb in enumerate(embeddings)]
+
+    def num_tokens_from_string(string: str) -> int:
+        """
+        Returns the number of tokens in a text string.
+        use bge_large_zh tokenizer
+        """
+        num_tokens = len(obj_models.embedding.tokenize(string))
+        return num_tokens
+
+    usage = CompletionUsage(
+        prompt_tokens=sum(len(text.split()) for text in request.input),
+        completion_tokens=0,
+        total_tokens=sum(num_tokens_from_string(text) for text in request.input),
+    )
+
+    return CreateEmbeddingResponse(
+        data=data,
+        model=request.model,
+        usage=usage,
+    )

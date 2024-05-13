@@ -118,3 +118,21 @@ class BaseResponse(BaseModel):
 class TransPayload(BaseModel):
     content: str
     to: Literal["en", "ja", "zh-tw"]
+
+
+class EmbeddingPayload(BaseModel):
+    input: Union[List[str], str]
+    model: str
+
+
+class Embedding(BaseModel):
+    embedding: List[float]
+    index: int
+    object: Literal["embedding"]
+
+
+class CreateEmbeddingResponse(BaseModel):
+    data: List[Embedding]
+    model: str
+    object: Literal["list"]
+    usage: CompletionUsage
