@@ -79,6 +79,7 @@ def get_bge_reranker_large():
 
 def get_llama3(size="8B"):
     model_type = 'llama'
+    assert size in ['8B', '70B']
     model_name_or_path = f"{model_type}/MetaAI/Meta-Llama-3-{size}-Instruct"
     if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
         auto_download(model_type, size=size, repair_name=f'MetaAI/Meta-Llama-3-{size}-Instruct')
@@ -193,6 +194,7 @@ def get_chatglm3():
 def get_baichuan2(size='7B'):
     '''加载百川基座模型'''
     model_type = 'baichuan'
+    assert size in ['7B', '14B']
     model_name_or_path = f"{model_type}/baichuan-inc/Baichuan2-{size}-Chat"
     if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
         auto_download(model_type, revision="v2.0.1", size=size)
@@ -248,6 +250,7 @@ def get_baichuan2(size='7B'):
 def get_qwen2(size='7B'):
     '''加载千问大模型'''
     model_type = "qwen"
+    assert size in ['0.5B', '1.8B', '4B', '7B', '14B', '32B', '72B', '110B']
     model_name_or_path = f"{model_type}/qwen/Qwen1.5-{size}-Chat"
     if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
         auto_download(model_type, size=size, repair_name=f"Qwen1.5-{size}-Chat")
