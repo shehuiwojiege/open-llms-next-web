@@ -16,17 +16,17 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_BASE_DIR = os.path.join(BASE_DIR, "llms")
 
 
-def auto_download(model_type: str, revision: str = None, repair_name: str = None):
+def auto_download(model_type: str, revision: str = None, size: str = None, repair_name: str = None):
     from modelscope import snapshot_download
     cache_dir = f"{MODEL_BASE_DIR}/{model_type}"
     if model_type == "chatglm":
         model_id = "ZhipuAI/chatglm3-6b"
     elif model_type == "baichuan":
-        model_id = "baichuan-inc/Baichuan2-13B-Chat"
+        model_id = f"baichuan-inc/Baichuan2-{size}-Chat"
     elif model_type == "qwen":
-        model_id = "qwen/Qwen1.5-7B-Chat"
+        model_id = f"qwen/Qwen1.5-{size}-Chat"
     elif model_type == "llama":
-        model_id = "LLM-Research/Meta-Llama-3-8B-Instruct"
+        model_id = f"LLM-Research/Meta-Llama-3-{size}-Instruct"
     elif model_type == "embedding":
         model_id = "AI-ModelScope/bge-large-zh-v1.5"
     elif model_type == "reranker":
@@ -77,11 +77,11 @@ def get_bge_reranker_large():
     }
 
 
-def get_llama3():
+def get_llama3(size="8B"):
     model_type = 'llama'
-    model_name_or_path = f"{model_type}/MetaAI/Meta-Llama-3-8B-Instruct"
+    model_name_or_path = f"{model_type}/MetaAI/Meta-Llama-3-{size}-Instruct"
     if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
-        auto_download(model_type, repair_name='MetaAI/Meta-Llama-3-8B-Instruct')
+        auto_download(model_type, size=size, repair_name=f'MetaAI/Meta-Llama-3-{size}-Instruct')
     SFT_MODEL_DIR = os.path.join(MODEL_BASE_DIR, f"{model_type}/ft_models")
     SFT_MODELS = ['baseline']
     logger.info(f'正在加载模型>>>>{model_name_or_path}\n')
@@ -190,12 +190,12 @@ def get_chatglm3():
     }
 
 
-def get_baichuan2():
+def get_baichuan2(size='7B'):
     '''加载百川基座模型'''
     model_type = 'baichuan'
-    model_name_or_path = f"{model_type}/baichuan-inc/Baichuan2-13B-Chat"
+    model_name_or_path = f"{model_type}/baichuan-inc/Baichuan2-{size}-Chat"
     if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
-        auto_download(model_type, revision="v2.0.1")
+        auto_download(model_type, revision="v2.0.1", size=size)
     SFT_MODEL_DIR = os.path.join(MODEL_BASE_DIR, f"{model_type}/ft_models")
     SFT_MODELS = ['baseline']
 
@@ -245,12 +245,12 @@ def get_baichuan2():
     }
 
 
-def get_qwen2():
+def get_qwen2(size='7B'):
     '''加载千问大模型'''
     model_type = "qwen"
-    model_name_or_path = f"{model_type}/qwen/Qwen1.5-7B-Chat"
+    model_name_or_path = f"{model_type}/qwen/Qwen1.5-{size}-Chat"
     if not os.path.exists(os.path.join(MODEL_BASE_DIR, model_name_or_path)):
-        auto_download(model_type, repair_name="Qwen1.5-7B-Chat")
+        auto_download(model_type, size=size, repair_name=f"Qwen1.5-{size}-Chat")
     SFT_MODEL_DIR = os.path.join(MODEL_BASE_DIR, f"{model_type}/ft_models")
     SFT_MODELS = ['baseline']
 
